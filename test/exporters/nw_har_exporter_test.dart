@@ -53,7 +53,8 @@ void main() {
     expect(request['method'], 'GET');
     expect(request['url'], contains('api.example.com'));
     expect(request['headers'], isA<List>());
-    expect((request['headers'] as List).any((h) => h['name'] == 'Accept'), true);
+    expect(
+        (request['headers'] as List).any((h) => h['name'] == 'Accept'), true);
     expect((request['queryString'] as List).any((q) => q['name'] == 'q'), true);
   });
 

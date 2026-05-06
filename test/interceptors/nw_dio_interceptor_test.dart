@@ -97,6 +97,54 @@ void main() {
     expect(tx.response, isA<NWNetworkErrorResponse>());
   });
 
+  test('Captures every HTTP method', () async {
+    final dio = await makeDio(
+      onFetch: (_) => ResponseBody.fromString('{}', 200, headers: {
+        'content-type': ['application/json'],
+      }),
+    );
+    await dio.put<dynamic>('/x');
+    await dio.patch<dynamic>('/x');
+    await dio.delete<dynamic>('/x');
+    await dio.head<dynamic>('/x');
+    await dio.request<dynamic>('/x', options: Options(method: 'OPTIONS'));
+    await dio.request<dynamic>('/x', options: Options(method: 'CUSTOM'));
+    final methods = NetWatch.transactions.map((t) => t.request.method).toList()
+      ..sort();
+    expect(methods.contains('PUT'), true);
+    expect(methods.contains('PATCH'), true);
+    expect(methods.contains('DELETE'), true);
+    expect(methods.contains('HEAD'), true);
+    expect(methods.contains('OPTIONS'), true);
+  });
+
+  test('FormData body is captured as fields/files map', () async {
+    final dio = await makeDio(
+      onFetch: (_) => ResponseBody.fromString('{}', 200, headers: {
+        'content-type': ['application/json'],
+      }),
+    );
+    final form = FormData.fromMap({'field1': 'value1'});
+    await dio.post<dynamic>('/upload', data: form);
+    final tx = NetWatch.transactions.first;
+    expect(tx.request.body, isA<Map>());
+    expect((tx.request.body as Map).containsKey('fields'), true);
+    expect((tx.request.body as Map).containsKey('files'), true);
+  });
+
+  test('Captures redirect (3xx)', () async {
+    final dio = await makeDio(
+      onFetch: (_) => ResponseBody.fromString('', 302, headers: {
+        'location': ['/elsewhere'],
+      }),
+    );
+    try {
+      await dio.get<dynamic>('/old');
+    } catch (_) {}
+    final tx = NetWatch.transactions.first;
+    expect(tx.response, isA<NWRedirectResponse>());
+  });
+
   test('Does not modify response data', () async {
     final dio = await makeDio(
       onFetch: (_) => ResponseBody.fromString(

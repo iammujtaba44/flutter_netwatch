@@ -1,10 +1,8 @@
 name: flutter_netwatch
-description: >
-  A production-grade Flutter HTTP inspector with sensitive data masking,
-  cURL export, Postman export, security analysis, floating bubble UI,
-  and QA-ready notifications. Zero navigator conflicts. Auto-disabled
-  in release builds.
-version: 0.1.0
+description: >-
+  Flutter HTTP inspector — capture Dio/http/Chopper traffic, mask secrets,
+  export cURL/Postman/HAR, replay requests, view stats. Auto-off in release.
+version: 0.2.1
 homepage: https://www.mujtaba.cc/
 repository: https://github.com/iammujtaba44/flutter_netwatch
 issue_tracker: https://github.com/iammujtaba44/flutter_netwatch/issues
@@ -18,11 +16,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  dio: ">=4.0.0 <6.0.0"
+  dio: ">=5.4.0 <6.0.0"
   http: ^1.2.0
-  chopper: ">=7.0.0 <9.0.0"
-  share_plus: ^10.0.0
-  path_provider: ^2.1.0
+  chopper: ">=8.0.0 <9.0.0"
+  share_plus: ">=11.0.0 <14.0.0"
 
 dev_dependencies:
   flutter_test:

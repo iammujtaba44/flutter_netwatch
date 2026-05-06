@@ -13,8 +13,7 @@ void main() {
     });
 
     test('detects GraphQL request from JSON string body', () {
-      const body =
-          '{"query":"query Foo { foo }","operationName":"Foo"}';
+      const body = '{"query":"query Foo { foo }","operationName":"Foo"}';
       expect(NWGraphQL.isGraphQLRequest(body), true);
     });
 

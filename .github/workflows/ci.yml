@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [master, main]
+  push:
+    branches: [master, main]
+
+# Cancel old runs when a new one starts on the same PR/branch.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Single fast job: format → analyze → tests with coverage → publish dry-run.
+  # Most PRs only need this. Runs on Flutter stable.
+  verify:
+    name: Format, analyze, test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --set-exit-if-changed .
+
+      - name: Static analysis
+        run: flutter analyze --fatal-warnings
+
+      - name: Run tests with coverage
+        run: flutter test --coverage --reporter expanded
+
+      - name: Enforce coverage floor (90% on business logic)
+        # UI / notification / navigation layers need widget tests, which are
+        # brittle and out of scope for this gate. We measure 90% on the rest:
+        # interceptors, exporters, models, masking, storage, replay, utils.
+        env:
+          MIN_COVERAGE: 90
+        run: |
+          if [ ! -f coverage/lcov.info ]; then
+            echo "::error::No coverage report produced."
+            exit 1
+          fi
+          # Strip UI/notification/navigation files from the lcov report.
+          awk '
+            /^SF:/ {
+              file = $0
+              keep = !(file ~ /lib\/src\/(ui|notification|navigation)\//)
+              if (keep) print
+              next
+            }
+            keep
+          ' coverage/lcov.info > coverage/lcov.business.info
+          covered=$(grep -c '^DA:.*,[1-9]' coverage/lcov.business.info || true)
+          total=$(grep -c '^DA:' coverage/lcov.business.info || true)
+          if [ "$total" -eq 0 ]; then
+            echo "::error::Business-logic lcov has 0 lines — exclusion regex too aggressive?"
+            exit 1
+          fi
+          pct=$(awk -v c="$covered" -v t="$total" 'BEGIN { printf "%.1f", (c/t)*100 }')
+          echo "Business-logic coverage: $pct% ($covered / $total)"
+          awk -v p="$pct" -v m="$MIN_COVERAGE" 'BEGIN { exit !(p+0 >= m+0) }' || {
+            echo "::error::Coverage $pct% is below minimum $MIN_COVERAGE%."
+            exit 1
+          }
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-lcov
+          path: coverage/lcov.info
+          if-no-files-found: ignore
+
+      - name: Publish dry-run
+        # Catches description-too-long, missing CHANGELOG, oversized archive,
+        # untracked-but-publishable files, etc. before they reach pub.dev.
+        run: dart pub publish --dry-run
+
+  # Verifies the lower bounds in pubspec.yaml are still buildable.
+  # Catches "we used a class that didn't exist in our minimum dio" before
+  # pub.dev's downgrade-analysis scorer does.
+  lower-bound-compat:
+    name: Lower-bound dep compat
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Downgrade to lowest constraints
+        run: flutter pub downgrade
+
+      - name: Analyze against lowest constraints
+        run: flutter analyze --fatal-warnings

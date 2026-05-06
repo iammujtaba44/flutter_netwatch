@@ -154,7 +154,46 @@ NetWatch.initialize(
 
 - **cURL** — copy/share any request as a runnable cURL command.
 - **Postman** — export single request or full collection (Postman Collection v2.1).
+- **HAR** — Chrome DevTools / Charles / Insomnia / Fiddler-compatible.
 - **Plain text** — share complete request/response details.
+
+### Replay
+
+Re-fire any captured request with one tap from the detail screen. Register a replayer once with the same HTTP client you're already capturing through:
+
+```dart
+final dio = Dio();
+dio.interceptors.add(NetWatch.dioInterceptor);
+NetWatch.registerReplayer(NWDioReplayer(dio));   // ← one line
+```
+
+For `http`:
+
+```dart
+final client = NetWatch.httpClient(http.Client());
+NetWatch.registerReplayer(NWHttpClientReplayer(client));
+```
+
+For Chopper or any custom client:
+
+```dart
+NetWatch.registerReplayer(NWCustomReplayer(
+  canHandle: (req) => req.url.host == 'api.mybackend.com',
+  replay: (req) async {
+    // re-fire `req` through your client of choice
+  },
+));
+```
+
+The Replay FAB only appears when at least one registered replayer's `canHandle()` returns true for that request — so you can register multiple replayers and route by host or method.
+
+### GraphQL pretty-print
+
+NetWatch detects GraphQL operations on the wire automatically. The transaction list shows the operation name (`GetUserProfile`, `UpdateOrder`, etc.) instead of the path, with a magenta `GQL` badge. The detail screen splits the body into `query` / `variables` / `data` / `errors` sections.
+
+### Stats screen
+
+Tap the bar-chart icon in the inspector AppBar for a live dashboard: total / success / failure / success-rate, avg / p95 / max duration, top-5 slowest endpoints, top-5 most-failing endpoints, and a per-host bar chart.
 
 ### Security analysis
 

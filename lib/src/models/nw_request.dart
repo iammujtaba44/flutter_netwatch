@@ -17,6 +17,7 @@ sealed class NWRequest {
   });
 }
 
+/// HTTP `GET` request — body is always null.
 final class NWGetRequest extends NWRequest {
   const NWGetRequest({
     required super.id,
@@ -26,6 +27,8 @@ final class NWGetRequest extends NWRequest {
   }) : super(method: 'GET', body: null);
 }
 
+/// HTTP `POST` request — used for creating resources or sending arbitrary
+/// payloads.
 final class NWPostRequest extends NWRequest {
   const NWPostRequest({
     required super.id,
@@ -36,6 +39,7 @@ final class NWPostRequest extends NWRequest {
   }) : super(method: 'POST');
 }
 
+/// HTTP `PUT` request — replaces a resource at the target URL.
 final class NWPutRequest extends NWRequest {
   const NWPutRequest({
     required super.id,
@@ -46,6 +50,7 @@ final class NWPutRequest extends NWRequest {
   }) : super(method: 'PUT');
 }
 
+/// HTTP `PATCH` request — applies a partial update to the target resource.
 final class NWPatchRequest extends NWRequest {
   const NWPatchRequest({
     required super.id,
@@ -56,6 +61,7 @@ final class NWPatchRequest extends NWRequest {
   }) : super(method: 'PATCH');
 }
 
+/// HTTP `DELETE` request — removes the target resource.
 final class NWDeleteRequest extends NWRequest {
   const NWDeleteRequest({
     required super.id,
@@ -66,6 +72,7 @@ final class NWDeleteRequest extends NWRequest {
   }) : super(method: 'DELETE');
 }
 
+/// HTTP `HEAD` request — like GET but the server returns no body.
 final class NWHeadRequest extends NWRequest {
   const NWHeadRequest({
     required super.id,
@@ -75,6 +82,7 @@ final class NWHeadRequest extends NWRequest {
   }) : super(method: 'HEAD', body: null);
 }
 
+/// HTTP `OPTIONS` request — used for CORS preflight and capability discovery.
 final class NWOptionsRequest extends NWRequest {
   const NWOptionsRequest({
     required super.id,
@@ -84,6 +92,8 @@ final class NWOptionsRequest extends NWRequest {
   }) : super(method: 'OPTIONS', body: null);
 }
 
+/// `multipart/form-data` request — used for file uploads. Carries [files]
+/// and a parallel map of plain-text [fields].
 final class NWMultipartRequest extends NWRequest {
   final List<NWMultipartFile> files;
   final Map<String, String> fields;
@@ -98,6 +108,8 @@ final class NWMultipartRequest extends NWRequest {
   }) : super(method: 'POST', body: null);
 }
 
+/// Metadata about one file inside a [NWMultipartRequest]. The actual bytes
+/// aren't stored — only enough to render and export the request.
 class NWMultipartFile {
   final String fieldName;
   final String fileName;
