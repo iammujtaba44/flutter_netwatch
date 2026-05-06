@@ -7,6 +7,7 @@ import '../core/netwatch_core.dart';
 import '../exporters/nw_curl_exporter.dart';
 import '../masking/nw_masker.dart';
 import '../models/nw_transaction.dart';
+import '../utils/nw_graphql.dart';
 import 'nw_curl_sheet.dart';
 
 class NWRequestTab extends StatelessWidget {
@@ -76,17 +77,23 @@ class NWRequestTab extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             if (body != null)
-              _Section(
-                title: 'Body',
-                trailing: IconButton(
-                  icon: const Icon(Icons.copy, size: 18),
-                  onPressed: () => _copyBody(context, body),
+              if (NWGraphQL.isGraphQLRequest(body))
+                _GraphQLRequestSection(body: body)
+              else
+                _Section(
+                  title: 'Body',
+                  trailing: IconButton(
+                    icon: const Icon(Icons.copy, size: 18),
+                    onPressed: () => _copyBody(context, body),
+                  ),
+                  child: SelectableText(
+                    _formatBody(body),
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
-                child: SelectableText(
-                  _formatBody(body),
-                  style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
-                ),
-              ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               icon: const Icon(Icons.code),
@@ -215,6 +222,63 @@ class _KeyValueRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _GraphQLRequestSection extends StatelessWidget {
+  final Object body;
+
+  const _GraphQLRequestSection({required this.body});
+
+  @override
+  Widget build(BuildContext context) {
+    final operation = NWGraphQL.operationName(body);
+    final type = NWGraphQL.operationType(body) ?? 'query';
+    final query = NWGraphQL.query(body) ?? '';
+    final variables = NWGraphQL.variables(body);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _Section(
+          title: 'GraphQL ${type.toUpperCase()}',
+          trailing: operation == null
+              ? null
+              : Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE10098).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    operation,
+                    style: const TextStyle(
+                      color: Color(0xFFE10098),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+          child: SelectableText(
+            query.trim(),
+            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+          ),
+        ),
+        if (variables != null && variables.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          _Section(
+            title: 'Variables',
+            child: SelectableText(
+              const JsonEncoder.withIndent('  ').convert(variables),
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 import '../core/netwatch_core.dart';
 import '../exporters/nw_curl_exporter.dart';
 import '../models/nw_transaction.dart';
+import 'nw_sheet_shell.dart';
 
 class NWCurlSheet extends StatelessWidget {
   final NWTransaction transaction;
@@ -23,8 +24,8 @@ class NWCurlSheet extends StatelessWidget {
       minChildSize: 0.4,
       maxChildSize: 0.95,
       expand: false,
-      builder: (context, controller) {
-        return Padding(
+      builder: (_, controller) => NWSheetShell(
+        builder: (context) => Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
@@ -110,8 +111,8 @@ class NWCurlSheet extends StatelessWidget {
               ),
             ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

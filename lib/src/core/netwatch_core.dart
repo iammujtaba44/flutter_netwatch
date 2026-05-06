@@ -8,6 +8,7 @@ import '../models/nw_transaction.dart';
 import '../navigation/nw_navigator_observer.dart';
 import '../navigation/nw_overlay_router.dart';
 import '../notification/nw_notification_layer.dart';
+import '../replay/nw_replayer.dart';
 import '../storage/nw_memory_storage.dart';
 import '../storage/nw_storage.dart';
 import 'nw_transaction_controller.dart';
@@ -27,10 +28,12 @@ class NetWatchCore {
 
   GlobalKey<OverlayState>? _overlayKey;
   GlobalKey<NavigatorState>? _navigatorKey;
+  final List<NWReplayer> _replayers = <NWReplayer>[];
   final NWNavigatorObserver _observer = NWNavigatorObserver();
   final NWTransactionController _txController = NWTransactionController();
   final ValueNotifier<int> unseenCount = ValueNotifier<int>(0);
   final ValueNotifier<bool> maskingEnabled = ValueNotifier<bool>(true);
+  final ValueNotifier<bool> notificationsEnabled = ValueNotifier<bool>(true);
 
   bool _initialized = false;
 
@@ -62,6 +65,7 @@ class NetWatchCore {
       sensitiveQueryParams: config.sensitiveQueryParams,
     );
     maskingEnabled.value = config.maskSensitiveData;
+    notificationsEnabled.value = config.showNotifications;
     _initialized = true;
   }
 
@@ -109,6 +113,37 @@ class NetWatchCore {
     maskingEnabled.value = enabled;
   }
 
+  void setNotifications(bool enabled) {
+    notificationsEnabled.value = enabled;
+  }
+
+  void registerReplayer(NWReplayer replayer) {
+    _replayers.add(replayer);
+  }
+
+  void clearReplayers() {
+    _replayers.clear();
+  }
+
+  bool get hasReplayer => _replayers.isNotEmpty;
+
+  bool canReplay(NWTransaction transaction) {
+    return _replayers.any((r) => r.canHandle(transaction.request));
+  }
+
+  Future<void> replay(NWTransaction transaction) async {
+    for (final r in _replayers) {
+      if (r.canHandle(transaction.request)) {
+        await r.replay(transaction.request);
+        return;
+      }
+    }
+    throw StateError(
+      'No NWReplayer registered that can handle this request. '
+      'Call NetWatch.registerReplayer(...) first.',
+    );
+  }
+
   void openInspector() {
     final key = _overlayKey;
     if (key == null || key.currentState == null) return;
@@ -122,8 +157,14 @@ class NetWatchCore {
     NWOverlayRouter.openTransactionDetail(key, transaction);
   }
 
+  void openStats() {
+    final key = _overlayKey;
+    if (key == null || key.currentState == null) return;
+    NWOverlayRouter.openStats(key);
+  }
+
   void _showNotification(NWTransaction transaction, {bool isUpdate = false}) {
-    if (!_config.showNotifications) return;
+    if (!notificationsEnabled.value) return;
     final key = _overlayKey;
     if (key == null || key.currentState == null) return;
     if (NWOverlayRouter.hasActive) return;

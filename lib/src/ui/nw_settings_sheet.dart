@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../core/netwatch_core.dart';
+import '../exporters/nw_har_exporter.dart';
 import '../exporters/nw_postman_exporter.dart';
+import 'nw_sheet_shell.dart';
 
 class NWSettingsSheet extends StatefulWidget {
   const NWSettingsSheet({super.key});
@@ -28,8 +30,8 @@ class _NWSettingsSheetState extends State<NWSettingsSheet> {
       minChildSize: 0.4,
       maxChildSize: 0.95,
       expand: false,
-      builder: (context, controller) {
-        return ListView(
+      builder: (_, controller) => NWSheetShell(
+        builder: (context) => ListView(
           controller: controller,
           padding: const EdgeInsets.all(16),
           children: [
@@ -53,6 +55,18 @@ class _NWSettingsSheetState extends State<NWSettingsSheet> {
                 title: const Text('Mask Sensitive Data'),
                 value: value,
                 onChanged: core.setMasking,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            ValueListenableBuilder<bool>(
+              valueListenable: core.notificationsEnabled,
+              builder: (_, value, __) => SwitchListTile(
+                title: const Text('Show Notifications'),
+                subtitle: const Text(
+                  'Pop-up banners when requests fire',
+                ),
+                value: value,
+                onChanged: core.setNotifications,
                 contentPadding: EdgeInsets.zero,
               ),
             ),
@@ -140,9 +154,30 @@ class _NWSettingsSheetState extends State<NWSettingsSheet> {
                 }
               },
             ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.archive_outlined),
+              label: const Text('Copy All as HAR'),
+              onPressed: () async {
+                final exporter = NWHarExporter(masker: core.masker);
+                final json = exporter.exportAll(
+                  core.storage.getAll(),
+                  masked: core.maskingEnabled.value,
+                );
+                await Clipboard.setData(ClipboardData(text: json));
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('HAR copied'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
+              },
+            ),
           ],
-        );
-      },
+        ),
+      ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/netwatch_core.dart';
 import '../models/nw_transaction.dart';
+import '../utils/nw_graphql.dart';
 
 class NWTransactionTile extends StatelessWidget {
   final NWTransaction transaction;
@@ -21,6 +22,8 @@ class NWTransactionTile extends StatelessWidget {
     final method = transaction.request.method;
     final url = transaction.request.url;
     final durationMs = transaction.response?.duration.inMilliseconds;
+    final gqlOperation = NWGraphQL.operationName(transaction.request.body);
+    final primaryLabel = gqlOperation ?? (url.path.isEmpty ? '/' : url.path);
 
     return Dismissible(
       key: ValueKey(transaction.id),
@@ -59,10 +62,14 @@ class NWTransactionTile extends StatelessWidget {
                       Row(
                         children: [
                           _MethodBadge(method: method),
+                          if (gqlOperation != null) ...[
+                            const SizedBox(width: 6),
+                            const _GqlBadge(),
+                          ],
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              url.path.isEmpty ? '/' : url.path,
+                              primaryLabel,
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
@@ -231,5 +238,29 @@ class _MethodBadge extends StatelessWidget {
       'DELETE' => const Color(0xFFF44336),
       _ => const Color(0xFF9E9E9E),
     };
+  }
+}
+
+class _GqlBadge extends StatelessWidget {
+  const _GqlBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE10098).withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(3),
+      ),
+      child: const Text(
+        'GQL',
+        style: TextStyle(
+          color: Color(0xFFE10098),
+          fontSize: 9,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
   }
 }

@@ -16,10 +16,12 @@ import 'src/interceptors/nw_http_client.dart';
 import 'src/models/nw_config.dart';
 import 'src/models/nw_transaction.dart';
 import 'src/navigation/nw_navigator_observer.dart';
+import 'src/replay/nw_replayer.dart';
 import 'src/ui/nw_builder_wrapper.dart';
 
 export 'src/core/netwatch_core.dart' show NetWatchCore;
 export 'src/exporters/nw_curl_exporter.dart';
+export 'src/exporters/nw_har_exporter.dart';
 export 'src/exporters/nw_postman_exporter.dart';
 export 'src/exporters/nw_share_exporter.dart';
 export 'src/interceptors/nw_chopper_interceptor.dart';
@@ -33,8 +35,10 @@ export 'src/models/nw_security_analysis.dart';
 export 'src/models/nw_transaction.dart';
 export 'src/models/nw_transaction_status.dart';
 export 'src/navigation/nw_navigator_observer.dart';
+export 'src/replay/nw_replayer.dart';
 export 'src/storage/nw_memory_storage.dart';
 export 'src/storage/nw_storage.dart';
+export 'src/utils/nw_graphql.dart';
 
 class NetWatch {
   NetWatch._();
@@ -77,4 +81,22 @@ class NetWatch {
       NetWatchCore.instance.transactionStream;
 
   static bool get isActive => NetWatchCore.instance.isActive;
+
+  /// Register a replayer so the inspector's "Replay" button can re-fire
+  /// captured requests. Pair with the matching interceptor:
+  ///
+  /// ```dart
+  /// final dio = Dio();
+  /// dio.interceptors.add(NetWatch.dioInterceptor);
+  /// NetWatch.registerReplayer(NWDioReplayer(dio));
+  /// ```
+  static void registerReplayer(NWReplayer replayer) =>
+      NetWatchCore.instance.registerReplayer(replayer);
+
+  /// Re-fire a captured transaction's request through any matching replayer.
+  /// Throws [StateError] if no replayer can handle it.
+  static Future<void> replay(NWTransaction transaction) =>
+      NetWatchCore.instance.replay(transaction);
+
+  static bool get hasReplayer => NetWatchCore.instance.hasReplayer;
 }

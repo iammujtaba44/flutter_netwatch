@@ -127,10 +127,30 @@ class _NWTransactionDetailState extends State<NWTransactionDetail> {
                     NWSecurityTab(transaction: _current),
                   ],
                 ),
-                floatingActionButton: FloatingActionButton.extended(
-                  onPressed: () => _openExport(context),
-                  icon: const Icon(Icons.share_outlined),
-                  label: const Text('Export'),
+                floatingActionButton: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (NetWatchCore.instance.hasReplayer &&
+                        NetWatchCore.instance.canReplay(_current)) ...[
+                      FloatingActionButton.extended(
+                        heroTag: 'nw_replay',
+                        onPressed: () => _replay(context),
+                        icon: const Icon(Icons.replay),
+                        label: const Text('Replay'),
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondaryContainer,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onSecondaryContainer,
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    FloatingActionButton.extended(
+                      heroTag: 'nw_export',
+                      onPressed: () => _openExport(context),
+                      icon: const Icon(Icons.share_outlined),
+                      label: const Text('Export'),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -146,5 +166,33 @@ class _NWTransactionDetailState extends State<NWTransactionDetail> {
       isScrollControlled: true,
       builder: (_) => NWExportSheet(transaction: _current),
     );
+  }
+
+  Future<void> _replay(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      const SnackBar(
+        content: Text('Replaying request...'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+    try {
+      await NetWatchCore.instance.replay(_current);
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Replay fired — see new transaction in inspector'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Replay failed: $e'),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    }
   }
 }

@@ -6,10 +6,12 @@ import 'package:share_plus/share_plus.dart';
 
 import '../core/netwatch_core.dart';
 import '../exporters/nw_curl_exporter.dart';
+import '../exporters/nw_har_exporter.dart';
 import '../exporters/nw_postman_exporter.dart';
 import '../exporters/nw_share_exporter.dart';
 import '../models/nw_response.dart';
 import '../models/nw_transaction.dart';
+import 'nw_sheet_shell.dart';
 
 class NWExportSheet extends StatelessWidget {
   final NWTransaction transaction;
@@ -21,6 +23,7 @@ class NWExportSheet extends StatelessWidget {
     final core = NetWatchCore.instance;
     final curl = NWCurlExporter(masker: core.masker);
     final postman = NWPostmanExporter(masker: core.masker);
+    final har = NWHarExporter(masker: core.masker);
     final shareExporter = NWShareExporter(masker: core.masker);
 
     return DraggableScrollableSheet(
@@ -28,8 +31,8 @@ class NWExportSheet extends StatelessWidget {
       minChildSize: 0.4,
       maxChildSize: 0.95,
       expand: false,
-      builder: (context, controller) {
-        return ListView(
+      builder: (_, controller) => NWSheetShell(
+        builder: (context) => ListView(
           controller: controller,
           padding: const EdgeInsets.all(16),
           children: [
@@ -100,6 +103,15 @@ class NWExportSheet extends StatelessWidget {
               label: 'Copy Response JSON',
               onTap: () => _copyResponse(context),
             ),
+            _ActionTile(
+              icon: Icons.archive_outlined,
+              label: 'Copy as HAR (Chrome / Charles)',
+              onTap: () => _copy(
+                context,
+                har.exportSingle(transaction, masked: core.maskingEnabled.value),
+                'HAR copied',
+              ),
+            ),
             const Divider(),
             const _SectionHeader(title: 'Share'),
             _ActionTile(
@@ -135,9 +147,20 @@ class NWExportSheet extends StatelessWidget {
                 await Share.share(value);
               },
             ),
+            _ActionTile(
+              icon: Icons.share_outlined,
+              label: 'Share as HAR',
+              onTap: () async {
+                final value = har.exportSingle(
+                  transaction,
+                  masked: core.maskingEnabled.value,
+                );
+                await Share.share(value);
+              },
+            ),
           ],
-        );
-      },
+        ),
+      ),
     );
   }
 

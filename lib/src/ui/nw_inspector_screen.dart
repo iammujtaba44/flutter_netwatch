@@ -28,77 +28,120 @@ class _NWInspectorScreenState extends State<NWInspectorScreen> {
       child: Material(
         color: Theme.of(context).scaffoldBackgroundColor,
         child: SafeArea(
-          child: Scaffold(
-            appBar: AppBar(
-              title: const Text('NetWatch'),
-              actions: [
-                IconButton(
-                  icon: Icon(_searchOpen ? Icons.search_off : Icons.search),
-                  onPressed: () {
-                    setState(() {
-                      _searchOpen = !_searchOpen;
-                      if (!_searchOpen) _query = '';
-                    });
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.settings_outlined),
-                  onPressed: _openSettings,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: _confirmClear,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: widget.onClose,
-                ),
-              ],
-            ),
-            body: Column(
-              children: [
-                if (_searchOpen)
-                  NWSearchBar(
-                    query: _query,
-                    onChanged: (v) => setState(() => _query = v),
-                    onClose: () => setState(() {
-                      _searchOpen = false;
-                      _query = '';
-                    }),
+          child: DefaultTabController(
+            length: 3,
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text('NetWatch'),
+                actions: [
+                  IconButton(
+                    icon: Icon(_searchOpen ? Icons.search_off : Icons.search),
+                    onPressed: () {
+                      setState(() {
+                        _searchOpen = !_searchOpen;
+                        if (!_searchOpen) _query = '';
+                      });
+                    },
                   ),
-                _FilterChipsRow(
-                  selected: _filter,
-                  onSelected: (f) => setState(() => _filter = f),
-                ),
-                const Divider(height: 1),
-                Expanded(
+                  IconButton(
+                    icon: const Icon(Icons.bar_chart),
+                    tooltip: 'Stats',
+                    onPressed: () =>
+                        NetWatchCore.instance.openStats(),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.settings_outlined),
+                    onPressed: _openSettings,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: _confirmClear,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: widget.onClose,
+                  ),
+                ],
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(48),
                   child: StreamBuilder<List<NWTransaction>>(
                     stream: NetWatchCore.instance.transactionStream,
                     initialData: NetWatchCore.instance.storage.getAll(),
                     builder: (context, snapshot) {
                       final all = snapshot.data ?? const <NWTransaction>[];
-                      final filtered = _applyFilters(all);
-                      if (filtered.isEmpty) {
-                        return const _EmptyState();
-                      }
-                      return ListView.separated(
-                        itemCount: filtered.length,
-                        separatorBuilder: (_, __) => const Divider(
-                          height: 1,
-                          indent: 12,
-                          endIndent: 12,
-                        ),
-                        itemBuilder: (_, i) => NWTransactionTile(
-                          transaction: filtered[i],
-                          onTap: () => NetWatchCore.instance
-                              .openTransactionDetail(filtered[i]),
-                        ),
+                      final successCount = all.where(_isSuccess).length;
+                      final failureCount = all.where(_isFailure).length;
+                      return TabBar(
+                        tabs: [
+                          _CountTab(
+                            label: 'All',
+                            count: all.length,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          _CountTab(
+                            label: 'Success',
+                            count: successCount,
+                            color: const Color(0xFF4CAF50),
+                          ),
+                          _CountTab(
+                            label: 'Failure',
+                            count: failureCount,
+                            color: const Color(0xFFF44336),
+                          ),
+                        ],
                       );
                     },
                   ),
                 ),
-                _BottomBar(),
-              ],
+              ),
+              body: Column(
+                children: [
+                  if (_searchOpen)
+                    NWSearchBar(
+                      query: _query,
+                      onChanged: (v) => setState(() => _query = v),
+                      onClose: () => setState(() {
+                        _searchOpen = false;
+                        _query = '';
+                      }),
+                    ),
+                  _FilterChipsRow(
+                    selected: _filter,
+                    onSelected: (f) => setState(() => _filter = f),
+                  ),
+                  const Divider(height: 1),
+                  Expanded(
+                    child: StreamBuilder<List<NWTransaction>>(
+                      stream: NetWatchCore.instance.transactionStream,
+                      initialData: NetWatchCore.instance.storage.getAll(),
+                      builder: (context, snapshot) {
+                        final all = snapshot.data ?? const <NWTransaction>[];
+                        return TabBarView(
+                          children: [
+                            _TransactionList(
+                              transactions: _applyAllFilters(all),
+                              emptyHint: 'No requests yet',
+                            ),
+                            _TransactionList(
+                              transactions: _applyAllFilters(
+                                all.where(_isSuccess).toList(),
+                              ),
+                              emptyHint: 'No successful requests yet',
+                            ),
+                            _TransactionList(
+                              transactions: _applyAllFilters(
+                                all.where(_isFailure).toList(),
+                              ),
+                              emptyHint: 'No failures yet',
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  _BottomBar(),
+                ],
+              ),
             ),
           ),
         ),
@@ -106,9 +149,23 @@ class _NWInspectorScreenState extends State<NWInspectorScreen> {
     );
   }
 
-  List<NWTransaction> _applyFilters(List<NWTransaction> list) {
+  bool _isSuccess(NWTransaction t) {
+    if (t.isPending) return true;
+    final code = t.statusCode;
+    if (code == null) return false;
+    return code >= 200 && code < 400;
+  }
+
+  bool _isFailure(NWTransaction t) {
+    if (t.isError) return true;
+    final code = t.statusCode;
+    if (code == null) return false;
+    return code >= 400;
+  }
+
+  List<NWTransaction> _applyAllFilters(List<NWTransaction> list) {
     return list.where((t) {
-      if (!_matchesFilter(t)) return false;
+      if (!_matchesChipFilter(t)) return false;
       if (_query.trim().isEmpty) return true;
       final q = _query.toLowerCase();
       return t.request.url.toString().toLowerCase().contains(q) ||
@@ -117,7 +174,7 @@ class _NWInspectorScreenState extends State<NWInspectorScreen> {
     }).toList();
   }
 
-  bool _matchesFilter(NWTransaction t) {
+  bool _matchesChipFilter(NWTransaction t) {
     final code = t.statusCode;
     return switch (_filter) {
       NWStatusFilter.all => true,
@@ -168,9 +225,48 @@ class _RootGuard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: true,
-      child: child,
+    return PopScope(canPop: true, child: child);
+  }
+}
+
+class _CountTab extends StatelessWidget {
+  final String label;
+  final int count;
+  final Color color;
+
+  const _CountTab({
+    required this.label,
+    required this.count,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tab(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label),
+          const SizedBox(width: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            constraints: const BoxConstraints(minWidth: 22),
+            child: Text(
+              '$count',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w700,
+                fontSize: 11,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -198,6 +294,33 @@ class _FilterChipsRow extends StatelessWidget {
             const SizedBox(width: 6),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _TransactionList extends StatelessWidget {
+  final List<NWTransaction> transactions;
+  final String emptyHint;
+
+  const _TransactionList({
+    required this.transactions,
+    required this.emptyHint,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (transactions.isEmpty) {
+      return _EmptyState(hint: emptyHint);
+    }
+    return ListView.separated(
+      itemCount: transactions.length,
+      separatorBuilder: (_, __) =>
+          const Divider(height: 1, indent: 12, endIndent: 12),
+      itemBuilder: (_, i) => NWTransactionTile(
+        transaction: transactions[i],
+        onTap: () =>
+            NetWatchCore.instance.openTransactionDetail(transactions[i]),
       ),
     );
   }
@@ -261,7 +384,9 @@ class _BottomBar extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+  final String hint;
+
+  const _EmptyState({required this.hint});
 
   @override
   Widget build(BuildContext context) {
@@ -279,12 +404,12 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'No requests captured yet',
+              hint,
               style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 16),
             ),
             const SizedBox(height: 8),
             Text(
-              'Make an HTTP call to see it here',
+              'Make HTTP calls to populate this list',
               style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13),
             ),
           ],

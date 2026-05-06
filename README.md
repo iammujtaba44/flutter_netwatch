@@ -5,6 +5,23 @@ A production-grade Flutter HTTP inspector with sensitive data masking, cURL expo
 [![Author](https://img.shields.io/badge/Author-Mujtaba-1F6FEB?style=for-the-badge&logo=safari&logoColor=white)](https://www.mujtaba.cc/)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/immujtaba9h)
 
+## Demo
+
+<p align="center">
+  <img src="assets/demo.gif" alt="flutter_netwatch demo" width="320" />
+</p>
+
+The recording shows a real Flutter app running with `flutter_netwatch` wired in:
+
+1. The app fires HTTP requests through Dio.
+2. Each request shows up live in the floating bubble (top-right) with an unseen-count badge.
+3. Tap the bubble to open the full-screen inspector — list filters by 2xx / 3xx / 4xx / 5xx / slow / errors.
+4. Tap a transaction to inspect URL, headers, body, and security analysis.
+5. Toggle the lock icon to mask sensitive headers / fields / query params live.
+6. FAB **Export** opens cURL, Postman, and plain-text export options.
+
+> Full-quality MP4: [assets/demo.mp4](assets/demo.mp4)
+
 - **Zero navigator conflicts** — works with any `MaterialApp` setup
 - **Auto-disabled in release builds** via `kReleaseMode`
 - **Sealed classes** throughout — exhaustive pattern matching

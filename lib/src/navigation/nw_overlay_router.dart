@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/nw_transaction.dart';
 import '../ui/nw_inspector_screen.dart';
+import '../ui/nw_stats_screen.dart';
 import '../ui/nw_theme.dart';
 import '../ui/nw_transaction_detail.dart';
 
@@ -20,6 +21,20 @@ class NWOverlayRouter {
     entry = OverlayEntry(
       builder: (_) => _ScreenHost(
         child: NWInspectorScreen(onClose: () => _removeEntry(entry)),
+      ),
+    );
+    _activeEntries.add(entry);
+    overlay.insert(entry);
+  }
+
+  static void openStats(GlobalKey<OverlayState> overlayKey) {
+    final overlay = overlayKey.currentState;
+    if (overlay == null) return;
+
+    late OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (_) => _ScreenHost(
+        child: NWStatsScreen(onClose: () => _removeEntry(entry)),
       ),
     );
     _activeEntries.add(entry);

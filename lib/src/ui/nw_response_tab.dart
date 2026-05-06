@@ -7,6 +7,7 @@ import '../core/netwatch_core.dart';
 import '../masking/nw_masker.dart';
 import '../models/nw_response.dart';
 import '../models/nw_transaction.dart';
+import '../utils/nw_graphql.dart';
 
 class NWResponseTab extends StatelessWidget {
   final NWTransaction transaction;
@@ -82,6 +83,10 @@ class NWResponseTab extends StatelessWidget {
                     ),
             ),
             const SizedBox(height: 12),
+            if (NWGraphQL.isGraphQLResponse(_bodyOf(response))) ...[
+              _GraphQLResponseSection(body: _bodyOf(response)),
+              const SizedBox(height: 12),
+            ],
             _Section(
               title: 'Body',
               trailing: IconButton(
@@ -425,6 +430,71 @@ class _KeyValueRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _GraphQLResponseSection extends StatelessWidget {
+  final Object? body;
+
+  const _GraphQLResponseSection({required this.body});
+
+  @override
+  Widget build(BuildContext context) {
+    final data = NWGraphQL.responseData(body);
+    final errors = NWGraphQL.responseErrors(body);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (errors != null)
+          _Section(
+            title: 'GraphQL Errors',
+            trailing: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF44336).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                '${errors.length}',
+                style: const TextStyle(
+                  color: Color(0xFFF44336),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 11,
+                ),
+              ),
+            ),
+            child: SelectableText(
+              const JsonEncoder.withIndent('  ').convert(errors),
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+            ),
+          ),
+        if (errors != null && data != null) const SizedBox(height: 12),
+        if (data != null)
+          _Section(
+            title: 'GraphQL Data',
+            trailing: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE10098).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: const Text(
+                'GraphQL',
+                style: TextStyle(
+                  color: Color(0xFFE10098),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 11,
+                ),
+              ),
+            ),
+            child: SelectableText(
+              const JsonEncoder.withIndent('  ').convert(data),
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+            ),
+          ),
+      ],
     );
   }
 }
