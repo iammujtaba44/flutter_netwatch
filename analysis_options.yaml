@@ -1,0 +1,21 @@
+include: package:lints/recommended.yaml
+
+linter:
+  rules:
+    prefer_const_constructors: true
+    prefer_final_fields: true
+    prefer_const_declarations: true
+    avoid_print: true
+    public_member_api_docs: false
+    use_super_parameters: true
+
+analyzer:
+  language:
+    strict-casts: false
+    strict-inference: false
+    strict-raw-types: false
+  errors:
+    deprecated_member_use_from_same_package: ignore
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"

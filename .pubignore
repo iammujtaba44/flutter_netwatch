@@ -1,0 +1,30 @@
+# Strip everything pub.dev doesn't need so the published archive stays tiny.
+# Note: .gitignore is honored by `dart pub publish` automatically; this file
+# only adds extra exclusions on top.
+
+# Build artifacts (also ignored by git, redundant but explicit)
+build/
+.dart_tool/
+
+# Example app native scaffolding — pub.dev only needs example/lib + pubspec
+example/android/
+example/ios/
+example/macos/
+example/linux/
+example/windows/
+example/web/
+example/test/
+example/.dart_tool/
+example/build/
+example/.metadata
+example/example.iml
+example/pubspec.lock
+example/analysis_options.yaml
+example/.gitignore
+example/README.md
+
+# OS / IDE noise
+.DS_Store
+*.iml
+.vscode/
+.idea/
