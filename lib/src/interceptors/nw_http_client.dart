@@ -10,9 +10,13 @@ import '../models/nw_security_analysis.dart';
 import '../models/nw_transaction.dart';
 import '../models/nw_transaction_status.dart';
 
+/// Drop-in `http.Client` wrapper that captures every request fired through it.
+/// Pass an existing client (or omit to wrap a fresh one).
 class NWHttpClient extends http.BaseClient {
+  /// The underlying client this wrapper delegates to.
   final http.Client _inner;
 
+  /// Wraps [inner] so every request and response goes through NetWatch.
   NWHttpClient(this._inner);
 
   @override

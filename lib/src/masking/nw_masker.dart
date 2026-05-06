@@ -2,6 +2,9 @@ import 'dart:convert';
 
 const String nwMaskedValue = '[MASKED]';
 
+/// Pure, stateless masker — replaces values for sensitive header keys, body
+/// fields, and URL query params with [nwMaskedValue]. Matching is
+/// case-insensitive. Safe to share across threads.
 class NWMasker {
   final List<String> sensitiveHeaders;
   final List<String> sensitiveBodyFields;

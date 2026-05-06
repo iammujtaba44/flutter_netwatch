@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+/// Configuration passed to [NetWatch.initialize]. Most fields default to
+/// sensible values — override only what you need.
 class NetWatchConfig {
   final bool enabled;
   final int maxTransactions;

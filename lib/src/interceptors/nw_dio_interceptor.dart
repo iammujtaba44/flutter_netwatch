@@ -8,6 +8,8 @@ import '../models/nw_security_analysis.dart';
 import '../models/nw_transaction.dart';
 import '../models/nw_transaction_status.dart';
 
+/// Dio interceptor that captures every request, response, and error that
+/// passes through a [Dio] instance. Add it to `dio.interceptors`.
 class NWDioInterceptor extends Interceptor {
   static const String _idKey = '_nw_id';
   static const String _startKey = '_nw_start';

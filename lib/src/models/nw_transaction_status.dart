@@ -3,10 +3,12 @@ sealed class NWTransactionStatus {
   const NWTransactionStatus();
 }
 
+/// The request has been fired but no response has arrived yet.
 final class NWStatusPending extends NWTransactionStatus {
   const NWStatusPending();
 }
 
+/// 2xx/3xx response within the configured performance budget.
 final class NWStatusSuccess extends NWTransactionStatus {
   final int statusCode;
   final Duration duration;
@@ -17,6 +19,7 @@ final class NWStatusSuccess extends NWTransactionStatus {
   });
 }
 
+/// 4xx or 5xx response — the server replied but with an error code.
 final class NWStatusError extends NWTransactionStatus {
   final int? statusCode;
   final String message;
@@ -27,6 +30,8 @@ final class NWStatusError extends NWTransactionStatus {
   });
 }
 
+/// 2xx response that arrived but exceeded the configured [budgetMs] —
+/// surfaced as a perf warning rather than a hard failure.
 final class NWStatusSlow extends NWTransactionStatus {
   final int statusCode;
   final Duration duration;
@@ -39,6 +44,7 @@ final class NWStatusSlow extends NWTransactionStatus {
   });
 }
 
+/// The request never reached a server (DNS, timeout, dropped connection).
 final class NWStatusNetworkError extends NWTransactionStatus {
   final String message;
 

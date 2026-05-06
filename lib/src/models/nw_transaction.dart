@@ -6,6 +6,8 @@ import 'nw_response.dart';
 import 'nw_security_analysis.dart';
 import 'nw_transaction_status.dart';
 
+/// One captured HTTP transaction — the request, its response (if any), the
+/// derived [status], and a [security] analysis. Streamed live to the UI.
 class NWTransaction {
   final String id;
   final NWRequest request;

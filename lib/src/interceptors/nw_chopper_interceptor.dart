@@ -11,6 +11,8 @@ import '../models/nw_security_analysis.dart';
 import '../models/nw_transaction.dart';
 import '../models/nw_transaction_status.dart';
 
+/// Chopper interceptor that captures every request and response that passes
+/// through a [ChopperClient]. Add it to your client's `interceptors` list.
 class NWChopperInterceptor implements Interceptor {
   static final Map<String, _PendingMeta> _pending = <String, _PendingMeta>{};
 

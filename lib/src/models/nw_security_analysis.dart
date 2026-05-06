@@ -16,6 +16,8 @@ class NWSecurityIssue {
   });
 }
 
+/// Snapshot of the security posture of a single request — HTTPS usage,
+/// presence of hardening headers, and any flagged [issues].
 class NWSecurityAnalysis {
   final bool isHttps;
   final List<NWSecurityIssue> issues;

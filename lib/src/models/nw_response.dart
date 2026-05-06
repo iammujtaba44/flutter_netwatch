@@ -11,6 +11,7 @@ sealed class NWResponse {
   });
 }
 
+/// 2xx response — the request completed successfully.
 final class NWSuccessResponse extends NWResponse {
   final int statusCode;
   final Object? body;
@@ -24,6 +25,7 @@ final class NWSuccessResponse extends NWResponse {
   });
 }
 
+/// 3xx response — the server redirected the request to [location].
 final class NWRedirectResponse extends NWResponse {
   final int statusCode;
   final String location;
@@ -37,6 +39,8 @@ final class NWRedirectResponse extends NWResponse {
   });
 }
 
+/// 4xx response — the request failed because of something on the client side
+/// (bad request, unauthorized, not found, etc.).
 final class NWClientErrorResponse extends NWResponse {
   final int statusCode;
   final Object? body;
@@ -50,6 +54,7 @@ final class NWClientErrorResponse extends NWResponse {
   });
 }
 
+/// 5xx response — the server failed to fulfil an apparently-valid request.
 final class NWServerErrorResponse extends NWResponse {
   final int statusCode;
   final Object? body;
@@ -63,6 +68,8 @@ final class NWServerErrorResponse extends NWResponse {
   });
 }
 
+/// The request never reached a server — DNS failure, timeout, dropped
+/// connection, TLS handshake failure, etc.
 final class NWNetworkErrorResponse extends NWResponse {
   final String errorMessage;
   final Object? originalError;
