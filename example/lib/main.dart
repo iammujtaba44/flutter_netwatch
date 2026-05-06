@@ -26,6 +26,11 @@ void main() {
 
   httpClient = NetWatch.httpClient(http.Client());
 
+  // Register replayers so the Replay FAB shows up on the detail screen.
+  // First replayer whose canHandle() returns true wins. Order matters.
+  NetWatch.registerReplayer(NWDioReplayer(dio));
+  NetWatch.registerReplayer(NWHttpClientReplayer(httpClient));
+
   runApp(const ExampleApp());
 }
 

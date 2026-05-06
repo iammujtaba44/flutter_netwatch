@@ -46,8 +46,7 @@ class _NWInspectorScreenState extends State<NWInspectorScreen> {
                   IconButton(
                     icon: const Icon(Icons.bar_chart),
                     tooltip: 'Stats',
-                    onPressed: () =>
-                        NetWatchCore.instance.openStats(),
+                    onPressed: () => NetWatchCore.instance.openStats(),
                   ),
                   IconButton(
                     icon: const Icon(Icons.settings_outlined),

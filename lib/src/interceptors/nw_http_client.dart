@@ -44,11 +44,29 @@ class NWHttpClient extends http.BaseClient {
     try {
       final response = await _inner.send(request);
       stopwatch.stop();
+
+      // Buffer the body once so we can both capture it AND hand a fresh,
+      // un-consumed stream back to the caller.
+      final bytes = await response.stream.toBytes();
       try {
-        final nwResponse = await _buildResponse(response, stopwatch.elapsed);
+        final nwResponse = _buildResponseFromBytes(
+          response,
+          bytes,
+          stopwatch.elapsed,
+        );
         NetWatchCore.instance.updateTransaction(id, nwResponse);
       } catch (_) {}
-      return response;
+
+      return http.StreamedResponse(
+        Stream<List<int>>.value(bytes),
+        response.statusCode,
+        contentLength: response.contentLength ?? bytes.length,
+        request: response.request,
+        headers: response.headers,
+        isRedirect: response.isRedirect,
+        persistentConnection: response.persistentConnection,
+        reasonPhrase: response.reasonPhrase,
+      );
     } catch (e) {
       stopwatch.stop();
       try {
@@ -163,17 +181,17 @@ class NWHttpClient extends http.BaseClient {
     return body;
   }
 
-  Future<NWResponse> _buildResponse(
+  NWResponse _buildResponseFromBytes(
     http.StreamedResponse response,
+    List<int> bytes,
     Duration duration,
-  ) async {
+  ) {
     final headers = Map<String, String>.from(response.headers);
     final code = response.statusCode;
     final contentLength = response.contentLength;
 
     Object? body;
     try {
-      final bytes = await response.stream.toBytes();
       final text = utf8.decode(bytes, allowMalformed: true);
       final contentType = (headers['content-type'] ?? '').toLowerCase();
       if (contentType.contains('application/json')) {

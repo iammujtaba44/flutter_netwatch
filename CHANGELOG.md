@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.1
+
+- Migrated to `SharePlus.instance.share(ShareParams(text: ...))` — fixes the `Share.share` deprecation warnings flagged by pub.dev's static analysis.
+- Minimum `share_plus` bumped from `>=10.0.0` to `>=11.0.0` (where the `SharePlus` singleton was introduced).
+- Fixed a real bug in `NWHttpClient`: it was consuming the response stream during capture, leaving the caller with a `StreamHasAlreadyBeenListenedToError`. Bytes are now buffered once and a fresh `StreamedResponse` is handed back.
+- Added 70 new unit tests (102 → 137 total). Business-logic line coverage is now 92.7%.
+- Added GitHub Actions CI: format, analyze, tests with 90% coverage gate, lower-bound dep compat, publish dry-run.
+
 ## 0.2.0
 
 ### New features

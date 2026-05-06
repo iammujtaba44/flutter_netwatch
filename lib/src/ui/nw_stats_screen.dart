@@ -143,8 +143,7 @@ class _Stats {
         completedDurations.add(ms);
         final endpoint = '${t.request.method} ${t.request.url.path}';
         (endpointDurations[endpoint] ??= <int>[]).add(ms);
-        if (t.isError ||
-            (t.statusCode != null && t.statusCode! >= 400)) {
+        if (t.isError || (t.statusCode != null && t.statusCode! >= 400)) {
           endpointFailures[endpoint] = (endpointFailures[endpoint] ?? 0) + 1;
         }
       }
@@ -164,9 +163,8 @@ class _Stats {
         : completedDurations.reduce((a, b) => a + b) /
             completedDurations.length;
     final p95 = _percentile(completedDurations, 95);
-    final max = completedDurations.isEmpty
-        ? 0.0
-        : completedDurations.last.toDouble();
+    final max =
+        completedDurations.isEmpty ? 0.0 : completedDurations.last.toDouble();
 
     final slowest = endpointDurations.entries
         .map((e) => MapEntry(

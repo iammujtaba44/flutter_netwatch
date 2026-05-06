@@ -103,7 +103,7 @@ class NWCurlSheet extends StatelessWidget {
                           transaction,
                           masked: NetWatchCore.instance.maskingEnabled.value,
                         );
-                        await Share.share(curl);
+                        await SharePlus.instance.share(ShareParams(text: curl));
                       },
                     ),
                   ),

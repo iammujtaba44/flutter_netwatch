@@ -108,7 +108,8 @@ class NWExportSheet extends StatelessWidget {
               label: 'Copy as HAR (Chrome / Charles)',
               onTap: () => _copy(
                 context,
-                har.exportSingle(transaction, masked: core.maskingEnabled.value),
+                har.exportSingle(transaction,
+                    masked: core.maskingEnabled.value),
                 'HAR copied',
               ),
             ),
@@ -122,7 +123,7 @@ class NWExportSheet extends StatelessWidget {
                   transaction,
                   masked: core.maskingEnabled.value,
                 );
-                await Share.share(value);
+                await SharePlus.instance.share(ShareParams(text: value));
               },
             ),
             _ActionTile(
@@ -133,7 +134,7 @@ class NWExportSheet extends StatelessWidget {
                   transaction,
                   masked: core.maskingEnabled.value,
                 );
-                await Share.share(value);
+                await SharePlus.instance.share(ShareParams(text: value));
               },
             ),
             _ActionTile(
@@ -144,7 +145,7 @@ class NWExportSheet extends StatelessWidget {
                   transaction,
                   masked: core.maskingEnabled.value,
                 );
-                await Share.share(value);
+                await SharePlus.instance.share(ShareParams(text: value));
               },
             ),
             _ActionTile(
@@ -155,7 +156,7 @@ class NWExportSheet extends StatelessWidget {
                   transaction,
                   masked: core.maskingEnabled.value,
                 );
-                await Share.share(value);
+                await SharePlus.instance.share(ShareParams(text: value));
               },
             ),
           ],

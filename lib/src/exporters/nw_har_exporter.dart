@@ -122,9 +122,8 @@ class NWHarExporter {
       };
     }
 
-    final headers = masked
-        ? masker.maskHeaders(response.headers)
-        : response.headers;
+    final headers =
+        masked ? masker.maskHeaders(response.headers) : response.headers;
     final mime = headers['content-type'] ?? headers['Content-Type'] ?? '';
     final body = _bodyOf(response, masked: masked);
     final bodyText = _stringifyBody(body);
