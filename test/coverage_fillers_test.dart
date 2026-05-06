@@ -91,7 +91,8 @@ void main() {
 
     test('transactionStream emits the current list', () async {
       final emitted = <int>[];
-      final sub = NetWatch.transactionStream.listen((list) => emitted.add(list.length));
+      final sub =
+          NetWatch.transactionStream.listen((list) => emitted.add(list.length));
       _addDummyTx();
       _addDummyTx();
       await Future<void>.delayed(const Duration(milliseconds: 10));
