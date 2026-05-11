@@ -228,15 +228,20 @@ NetWatch checks `kReleaseMode` at initialization and at every interceptor entry 
 
 You can leave `NetWatch.initialize()` and the interceptors in production code with zero overhead.
 
+## Related Packages
+
+- [flutter_release_checklist](https://pub.dev/packages/flutter_release_checklist) — Pre-release security and quality CLI
+
 ## Author
 
 Built by **[Mujtaba](https://www.mujtaba.cc/)** — software engineer working on Flutter, AI, and developer tooling.
 
-If `flutter_netwatch` saves you debugging time, consider supporting:
+## Support
 
-<a href="https://buymeacoffee.com/immujtaba9h" target="_blank">
-  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50" />
-</a>
+If this package saves your team time, consider sponsoring:
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/iammujtaba44?style=flat&logo=github&label=Sponsor)](https://github.com/sponsors/iammujtaba44)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-☕-yellow)](https://buymeacoffee.com/immujtaba9h)
 
 ## License
 
