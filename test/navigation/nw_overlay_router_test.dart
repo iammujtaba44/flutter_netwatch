@@ -18,6 +18,24 @@ void main() {
     expect(find.text('app body'), findsOneWidget);
   });
 
+  testWidgets('NetWatch.builder is pass-through when disabled', (tester) async {
+    NetWatch.initialize(config: const NetWatchConfig(enabled: false));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: NetWatch.builder,
+        home: const Scaffold(body: Text('app body')),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    NetWatch.open();
+    await tester.pumpAndSettle();
+
+    expect(find.text('app body'), findsOneWidget);
+    expect(find.text('NetWatch'), findsNothing);
+  });
+
   testWidgets('Inspector opens via overlay without pushing route',
       (tester) async {
     final navKey = GlobalKey<NavigatorState>();

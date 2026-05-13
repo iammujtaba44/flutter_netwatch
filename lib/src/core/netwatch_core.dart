@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../masking/nw_masker.dart';
@@ -42,7 +41,7 @@ class NetWatchCore {
   NWMasker get masker => _masker;
   NWNavigatorObserver get observer => _observer;
   bool get isInitialized => _initialized;
-  bool get isActive => _initialized && _config.enabled && !kReleaseMode;
+  bool get isActive => _initialized && _config.enabled;
 
   GlobalKey<NavigatorState> get navigatorKey =>
       _navigatorKey ??= GlobalKey<NavigatorState>();
@@ -52,11 +51,6 @@ class NetWatchCore {
   Stream<List<NWTransaction>> get transactionStream => _txController.stream;
 
   void initialize({required NetWatchConfig config}) {
-    if (kReleaseMode) {
-      _config = config.copyWith(enabled: false);
-      _initialized = true;
-      return;
-    }
     _config = config;
     _storage = NWMemoryStorage(maxSize: config.maxTransactions);
     _masker = NWMasker(

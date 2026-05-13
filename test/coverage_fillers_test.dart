@@ -72,6 +72,14 @@ void main() {
       expect(NetWatch.isActive, true);
     });
 
+    test('isActive follows enabled flag', () {
+      NetWatch.initialize(config: const NetWatchConfig(enabled: false));
+      expect(NetWatch.isActive, false);
+
+      NetWatch.initialize(config: const NetWatchConfig(enabled: true));
+      expect(NetWatch.isActive, true);
+    });
+
     test('observer returns the singleton observer', () {
       expect(NetWatch.observer, NetWatchCore.instance.observer);
     });

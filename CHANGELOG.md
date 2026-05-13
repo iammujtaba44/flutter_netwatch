@@ -2,6 +2,7 @@
 
 ## 0.2.1
 
+- `NetWatchConfig.enabled` now controls NetWatch in every build mode. Release builds are no longer force-disabled via `kReleaseMode`.
 - Migrated to `SharePlus.instance.share(ShareParams(text: ...))` — fixes the `Share.share` deprecation warnings flagged by pub.dev's static analysis.
 - Minimum `share_plus` bumped from `>=10.0.0` to `>=11.0.0` (where the `SharePlus` singleton was introduced).
 - Fixed a real bug in `NWHttpClient`: it was consuming the response stream during capture, leaving the caller with a `StreamHasAlreadyBeenListenedToError`. Bytes are now buffered once and a fresh `StreamedResponse` is handed back.

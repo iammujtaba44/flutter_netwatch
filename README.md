@@ -23,7 +23,7 @@ The recording shows a real Flutter app running with `flutter_netwatch` wired in:
 > Full-quality MP4: [assets/demo.mp4](assets/demo.mp4)
 
 - **Zero navigator conflicts** — works with any `MaterialApp` setup
-- **Auto-disabled in release builds** via `kReleaseMode`
+- **Runtime-configurable** via `NetWatchConfig.enabled`
 - **Sealed classes** throughout — exhaustive pattern matching
 - **No native dependencies** — pure Flutter Overlay
 - Supports **Dio**, **http**, and **Chopper**
@@ -32,13 +32,12 @@ The recording shows a real Flutter app running with `flutter_netwatch` wired in:
 
 ```yaml
 dependencies:
-  flutter_netwatch: ^0.1.0
+  flutter_netwatch: ^0.2.1
 ```
 
 ## Setup
 
 ```dart
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_netwatch/flutter_netwatch.dart';
 import 'package:dio/dio.dart';
@@ -48,7 +47,7 @@ void main() {
 
   NetWatch.initialize(
     config: NetWatchConfig(
-      enabled: !kReleaseMode,
+      enabled: true,
       maskSensitiveData: true,
       showFloatingBubble: true,
       showNotifications: true,
@@ -216,17 +215,17 @@ NetWatch.open();              // open inspector
 NetWatch.clear();             // clear captured transactions
 NetWatch.transactions;        // List<NWTransaction>
 NetWatch.transactionStream;   // Stream<List<NWTransaction>>
-NetWatch.isActive;            // false in release builds
+NetWatch.isActive;            // reflects initialize() + config.enabled
 ```
 
-## Auto-disable in release
+## Enable or disable NetWatch explicitly
 
-NetWatch checks `kReleaseMode` at initialization and at every interceptor entry point. In release builds:
-- `NetWatch.builder` returns the child unchanged.
+NetWatch follows `NetWatchConfig.enabled` in every build mode. When `enabled` is `false`:
+- `NetWatch.builder` becomes a pass-through wrapper.
 - Interceptors are no-ops — they call `handler.next()` immediately.
-- The core singleton stays empty.
+- The core singleton stays inactive and no transactions are stored.
 
-You can leave `NetWatch.initialize()` and the interceptors in production code with zero overhead.
+When `enabled` is `true`, capture and UI stay available even in release builds. That makes it possible to profile real release performance while still inspecting live HTTP traffic.
 
 ## Related Packages
 
