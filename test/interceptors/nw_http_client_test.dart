@@ -141,6 +141,19 @@ void main() {
     client.close();
     expect(innerClosed, true);
   });
+
+  test('Passes through without capture when disabled', () async {
+    NetWatch.initialize(config: const NetWatchConfig(enabled: false));
+
+    final client = NWHttpClient(
+      MockClient((req) async => http.Response('{"ok":true}', 200)),
+    );
+
+    final response = await client.get(Uri.parse('https://example.com/x'));
+
+    expect(response.statusCode, 200);
+    expect(NetWatch.transactions, isEmpty);
+  });
 }
 
 class _ClosableMockClient extends http.BaseClient {

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:chopper/chopper.dart';
-import 'package:flutter/foundation.dart';
 
 import '../core/netwatch_core.dart';
 import '../models/nw_request.dart';
@@ -20,7 +19,7 @@ class NWChopperInterceptor implements Interceptor {
   FutureOr<Response<BodyType>> intercept<BodyType>(
     Chain<BodyType> chain,
   ) async {
-    if (kReleaseMode || !NetWatchCore.instance.isActive) {
+    if (!NetWatchCore.instance.isActive) {
       return chain.proceed(chain.request);
     }
 

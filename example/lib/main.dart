@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_netwatch/flutter_netwatch.dart';
 import 'package:http/http.dart' as http;
@@ -12,7 +11,7 @@ void main() {
 
   NetWatch.initialize(
     config: const NetWatchConfig(
-      enabled: !kReleaseMode,
+      enabled: true,
       maskSensitiveData: true,
       showFloatingBubble: true,
       showNotifications: true,
