@@ -131,6 +131,29 @@ final chopperClient = ChopperClient(
 
 Tap the floating bubble (or call `NetWatch.open()`) to launch the full-screen inspector. Filter by status (2xx, 3xx, 4xx, 5xx, slow, errors), search by URL/method/status, and tap any row for full request/response/security details.
 
+### Customizing the floating bubble
+
+Want your own look for the floating button? Pass a `bubbleBuilder` to the config. You get the live unseen-request count and the open callback; NetWatch keeps handling drag, edge-snapping, and the long-press quick-stats menu — you only own the visual.
+
+```dart
+NetWatch.initialize(
+  config: NetWatchConfig(
+    bubbleBuilder: (context, unseenCount, openInspector) {
+      return FloatingActionButton(
+        onPressed: openInspector,
+        child: Badge.count(
+          isLabelVisible: unseenCount != 0,
+          count: unseenCount,
+          child: const Icon(Icons.wifi_tethering),
+        ),
+      );
+    },
+  ),
+);
+```
+
+Leave `bubbleBuilder` unset to use the built-in bubble (eye icon + unseen-count badge).
+
 ### Sensitive data masking
 
 Headers like `Authorization`, `Cookie`, `X-API-Key`, body fields like `password`, `token`, `secret`, and URL query params like `?token=...` are masked automatically. Toggle masking on/off live in the UI — affects every export.

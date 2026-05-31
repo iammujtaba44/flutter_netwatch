@@ -41,18 +41,45 @@ class _NWFloatingBubbleState extends State<NWFloatingBubble> {
       _initialized = true;
     }
 
+    final customBuilder = NetWatchCore.instance.config.bubbleBuilder;
+
     return Positioned(
       left: _position.dx,
       top: _position.dy,
       child: ValueListenableBuilder<int>(
         valueListenable: NetWatchCore.instance.unseenCount,
         builder: (context, count, _) {
+          // When a custom builder is provided, it controls the visual (and
+          // wires its own tap to openInspector). NetWatch still owns drag,
+          // edge-snap, and the long-press quick-stats menu.
+          final Widget visual = customBuilder != null
+              ? customBuilder(
+                  context,
+                  count,
+                  NetWatchCore.instance.openInspector,
+                )
+              : _BubbleVisual(
+                  count: count,
+                  size: bubbleSize,
+                  isDragging: false,
+                );
+          final Widget dragFeedback = customBuilder != null
+              ? Material(
+                  color: Colors.transparent,
+                  child: customBuilder(
+                    context,
+                    count,
+                    NetWatchCore.instance.openInspector,
+                  ),
+                )
+              : _BubbleVisual(
+                  count: count,
+                  size: bubbleSize,
+                  isDragging: true,
+                );
+
           return Draggable(
-            feedback: _BubbleVisual(
-              count: count,
-              size: bubbleSize,
-              isDragging: true,
-            ),
+            feedback: dragFeedback,
             childWhenDragging: const SizedBox.shrink(),
             onDragEnd: (details) {
               setState(() {
@@ -63,13 +90,14 @@ class _NWFloatingBubbleState extends State<NWFloatingBubble> {
               });
             },
             child: GestureDetector(
-              onTap: () => NetWatchCore.instance.openInspector(),
+              // The built-in visual has no tap handler of its own, so NetWatch
+              // wires the tap. A custom builder is expected to call
+              // openInspector itself, so we only attach long-press here.
+              onTap: customBuilder == null
+                  ? () => NetWatchCore.instance.openInspector()
+                  : null,
               onLongPress: () => _showQuickStats(context),
-              child: _BubbleVisual(
-                count: count,
-                size: bubbleSize,
-                isDragging: false,
-              ),
+              child: visual,
             ),
           );
         },

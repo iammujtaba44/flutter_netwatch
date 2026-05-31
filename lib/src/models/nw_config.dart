@@ -1,5 +1,22 @@
 import 'package:flutter/widgets.dart';
 
+/// Builds a custom floating bubble.
+///
+/// - [context] is the overlay build context.
+/// - [unseenCount] is the number of requests captured since the inspector was
+///   last opened (resets to 0 when it opens).
+/// - [openInspector] opens the NetWatch inspector — wire it to your widget's
+///   tap handler.
+///
+/// NetWatch keeps handling drag + edge-snap; the builder only controls the
+/// bubble's visual. Return any widget — a [FloatingActionButton], a [Badge],
+/// your own design, etc.
+typedef NWBubbleBuilder = Widget Function(
+  BuildContext context,
+  int unseenCount,
+  VoidCallback openInspector,
+);
+
 /// Configuration passed to [NetWatch.initialize]. Most fields default to
 /// sensible values — override only what you need.
 class NetWatchConfig {
@@ -10,6 +27,12 @@ class NetWatchConfig {
   final bool showNotifications;
   final Offset initialBubblePosition;
   final Duration notificationDuration;
+
+  /// Optional custom builder for the floating bubble. When null, NetWatch
+  /// renders its built-in bubble (eye icon + unseen-count badge). When set,
+  /// your widget replaces the visual but NetWatch still wraps it in the
+  /// draggable, edge-snapping container.
+  final NWBubbleBuilder? bubbleBuilder;
 
   final bool maskSensitiveData;
   final List<String> sensitiveHeaders;
@@ -25,6 +48,7 @@ class NetWatchConfig {
     this.showNotifications = true,
     this.initialBubblePosition = const Offset(20, 100),
     this.notificationDuration = const Duration(seconds: 3),
+    this.bubbleBuilder,
     this.maskSensitiveData = true,
     this.sensitiveHeaders = defaultSensitiveHeaders,
     this.sensitiveBodyFields = defaultSensitiveBodyFields,
@@ -39,6 +63,7 @@ class NetWatchConfig {
     bool? showNotifications,
     Offset? initialBubblePosition,
     Duration? notificationDuration,
+    NWBubbleBuilder? bubbleBuilder,
     bool? maskSensitiveData,
     List<String>? sensitiveHeaders,
     List<String>? sensitiveBodyFields,
@@ -53,6 +78,7 @@ class NetWatchConfig {
       initialBubblePosition:
           initialBubblePosition ?? this.initialBubblePosition,
       notificationDuration: notificationDuration ?? this.notificationDuration,
+      bubbleBuilder: bubbleBuilder ?? this.bubbleBuilder,
       maskSensitiveData: maskSensitiveData ?? this.maskSensitiveData,
       sensitiveHeaders: sensitiveHeaders ?? this.sensitiveHeaders,
       sensitiveBodyFields: sensitiveBodyFields ?? this.sensitiveBodyFields,
