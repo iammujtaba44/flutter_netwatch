@@ -18,6 +18,18 @@ void main() {
       showNotifications: true,
       maxTransactions: 200,
       performanceBudgetMs: 1000,
+      // Want your own floating button? Provide a bubbleBuilder (drop the
+      // `const` above since it captures a closure):
+      //
+      // bubbleBuilder: (context, unseenCount, openInspector) =>
+      //     FloatingActionButton(
+      //       onPressed: openInspector,
+      //       child: Badge.count(
+      //         isLabelVisible: unseenCount != 0,
+      //         count: unseenCount,
+      //         child: const Icon(Icons.wifi_tethering),
+      //       ),
+      //     ),
     ),
   );
 

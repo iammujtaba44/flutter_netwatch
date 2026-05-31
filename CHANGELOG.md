@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.3.0
+
+### New features
+
+- **Custom floating bubble** — pass a `bubbleBuilder` to `NetWatchConfig` to replace the built-in bubble with your own widget. The builder receives the live unseen-request count and the `openInspector` callback; NetWatch keeps handling drag, edge-snapping, and the long-press quick-stats menu. Resolves [#9](https://github.com/iammujtaba44/flutter_netwatch/issues/9).
+
+  ```dart
+  NetWatch.initialize(
+    config: NetWatchConfig(
+      bubbleBuilder: (context, unseenCount, openInspector) => FloatingActionButton(
+        onPressed: openInspector,
+        child: Badge.count(
+          isLabelVisible: unseenCount != 0,
+          count: unseenCount,
+          child: const Icon(Icons.wifi_tethering),
+        ),
+      ),
+    ),
+  );
+  ```
+
 ## 0.2.1
 
 - Migrated to `SharePlus.instance.share(ShareParams(text: ...))` — fixes the `Share.share` deprecation warnings flagged by pub.dev's static analysis.
