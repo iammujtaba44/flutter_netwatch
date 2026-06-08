@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_netwatch/flutter_netwatch.dart';
 import 'package:http/http.dart' as http;
@@ -11,12 +12,24 @@ void main() {
 
   NetWatch.initialize(
     config: const NetWatchConfig(
-      enabled: true,
+      enabled: !kReleaseMode,
       maskSensitiveData: true,
       showFloatingBubble: true,
       showNotifications: true,
       maxTransactions: 200,
       performanceBudgetMs: 1000,
+      // Want your own floating button? Provide a bubbleBuilder (drop the
+      // `const` above since it captures a closure):
+      //
+      // bubbleBuilder: (context, unseenCount, openInspector) =>
+      //     FloatingActionButton(
+      //       onPressed: openInspector,
+      //       child: Badge.count(
+      //         isLabelVisible: unseenCount != 0,
+      //         count: unseenCount,
+      //         child: const Icon(Icons.wifi_tethering),
+      //       ),
+      //     ),
     ),
   );
 

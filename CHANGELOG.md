@@ -1,8 +1,32 @@
 # Changelog
 
+## 0.3.0
+
+### New features
+
+- **Custom floating bubble** — pass a `bubbleBuilder` to `NetWatchConfig` to replace the built-in bubble with your own widget. The builder receives the live unseen-request count and the `openInspector` callback; NetWatch keeps handling drag, edge-snapping, and the long-press quick-stats menu. Resolves [#9](https://github.com/iammujtaba44/flutter_netwatch/issues/9).
+
+  ```dart
+  NetWatch.initialize(
+    config: NetWatchConfig(
+      bubbleBuilder: (context, unseenCount, openInspector) => FloatingActionButton(
+        onPressed: openInspector,
+        child: Badge.count(
+          isLabelVisible: unseenCount != 0,
+          count: unseenCount,
+          child: const Icon(Icons.wifi_tethering),
+        ),
+      ),
+    ),
+  );
+  ```
+
+### Breaking
+
+- Release builds now follow `NetWatchConfig.enabled`; set `enabled: !kReleaseMode` to keep prior release-off behavior, or `enabled: true` to opt into capture in release builds.
+
 ## 0.2.1
 
-- `NetWatchConfig.enabled` now controls NetWatch in every build mode. Release builds are no longer force-disabled via `kReleaseMode`.
 - Migrated to `SharePlus.instance.share(ShareParams(text: ...))` — fixes the `Share.share` deprecation warnings flagged by pub.dev's static analysis.
 - Minimum `share_plus` bumped from `>=10.0.0` to `>=11.0.0` (where the `SharePlus` singleton was introduced).
 - Fixed a real bug in `NWHttpClient`: it was consuming the response stream during capture, leaving the caller with a `StreamHasAlreadyBeenListenedToError`. Bytes are now buffered once and a fresh `StreamedResponse` is handed back.

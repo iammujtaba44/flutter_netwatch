@@ -32,12 +32,13 @@ The recording shows a real Flutter app running with `flutter_netwatch` wired in:
 
 ```yaml
 dependencies:
-  flutter_netwatch: ^0.2.1
+  flutter_netwatch: ^0.3.0
 ```
 
 ## Setup
 
 ```dart
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_netwatch/flutter_netwatch.dart';
 import 'package:dio/dio.dart';
@@ -47,7 +48,7 @@ void main() {
 
   NetWatch.initialize(
     config: NetWatchConfig(
-      enabled: true,
+      enabled: !kReleaseMode,
       maskSensitiveData: true,
       showFloatingBubble: true,
       showNotifications: true,
@@ -129,6 +130,29 @@ final chopperClient = ChopperClient(
 ### In-app inspector
 
 Tap the floating bubble (or call `NetWatch.open()`) to launch the full-screen inspector. Filter by status (2xx, 3xx, 4xx, 5xx, slow, errors), search by URL/method/status, and tap any row for full request/response/security details.
+
+### Customizing the floating bubble
+
+Want your own look for the floating button? Pass a `bubbleBuilder` to the config. You get the live unseen-request count and the open callback; NetWatch keeps handling drag, edge-snapping, and the long-press quick-stats menu — you only own the visual.
+
+```dart
+NetWatch.initialize(
+  config: NetWatchConfig(
+    bubbleBuilder: (context, unseenCount, openInspector) {
+      return FloatingActionButton(
+        onPressed: openInspector,
+        child: Badge.count(
+          isLabelVisible: unseenCount != 0,
+          count: unseenCount,
+          child: const Icon(Icons.wifi_tethering),
+        ),
+      );
+    },
+  ),
+);
+```
+
+Leave `bubbleBuilder` unset to use the built-in bubble (eye icon + unseen-count badge).
 
 ### Sensitive data masking
 
@@ -218,7 +242,19 @@ NetWatch.transactionStream;   // Stream<List<NWTransaction>>
 NetWatch.isActive;            // reflects initialize() + config.enabled
 ```
 
-## Enable or disable NetWatch explicitly
+## Enabling capture in release builds
+
+By default, `NetWatchConfig.enabled` is `!kReleaseMode`, so copy-paste setup stays off in release builds.
+
+To capture release-build traffic deliberately, opt in:
+
+```dart
+NetWatch.initialize(
+  config: const NetWatchConfig(
+    enabled: true,
+  ),
+);
+```
 
 NetWatch follows `NetWatchConfig.enabled` in every build mode. When `enabled` is `false`:
 - `NetWatch.builder` becomes a pass-through wrapper.
