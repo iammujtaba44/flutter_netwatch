@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../core/netwatch_core.dart';
@@ -21,7 +20,7 @@ class NWHttpClient extends http.BaseClient {
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
-    if (kReleaseMode || !NetWatchCore.instance.isActive) {
+    if (!NetWatchCore.instance.isActive) {
       return _inner.send(request);
     }
 

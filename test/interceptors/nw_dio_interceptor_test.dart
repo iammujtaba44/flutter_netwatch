@@ -159,6 +159,25 @@ void main() {
     expect(response.statusCode, 200);
     expect(response.data, {'value': 42});
   });
+
+  test('Passes through without capture when disabled', () async {
+    NetWatch.initialize(config: const NetWatchConfig(enabled: false));
+
+    final dio = await makeDio(
+      onFetch: (_) => ResponseBody.fromString(
+        '{"ok":true}',
+        200,
+        headers: {
+          'content-type': ['application/json'],
+        },
+      ),
+    );
+
+    final response = await dio.get<dynamic>('/users');
+
+    expect(response.statusCode, 200);
+    expect(NetWatch.transactions, isEmpty);
+  });
 }
 
 class _StubAdapter implements HttpClientAdapter {

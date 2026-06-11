@@ -1,11 +1,17 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_netwatch/flutter_netwatch.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
   group('NetWatchConfig.copyWith', () {
+    test('defaults to release-safe enabled flag', () {
+      const config = NetWatchConfig();
+      expect(config.enabled, !kReleaseMode);
+    });
+
     test('returns identical config when no overrides', () {
       const c = NetWatchConfig();
       final copy = c.copyWith();
@@ -69,6 +75,14 @@ void main() {
     });
 
     test('isActive reflects initialization', () {
+      expect(NetWatch.isActive, true);
+    });
+
+    test('isActive follows enabled flag', () {
+      NetWatch.initialize(config: const NetWatchConfig(enabled: false));
+      expect(NetWatch.isActive, false);
+
+      NetWatch.initialize(config: const NetWatchConfig(enabled: true));
       expect(NetWatch.isActive, true);
     });
 

@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 
 import '../core/netwatch_core.dart';
 import '../models/nw_request.dart';
@@ -19,7 +18,7 @@ class NWDioInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) {
-    if (kReleaseMode || !NetWatchCore.instance.isActive) {
+    if (!NetWatchCore.instance.isActive) {
       handler.next(options);
       return;
     }
@@ -49,7 +48,7 @@ class NWDioInterceptor extends Interceptor {
     Response<dynamic> response,
     ResponseInterceptorHandler handler,
   ) {
-    if (kReleaseMode || !NetWatchCore.instance.isActive) {
+    if (!NetWatchCore.instance.isActive) {
       handler.next(response);
       return;
     }
@@ -71,7 +70,7 @@ class NWDioInterceptor extends Interceptor {
     DioException err,
     ErrorInterceptorHandler handler,
   ) {
-    if (kReleaseMode || !NetWatchCore.instance.isActive) {
+    if (!NetWatchCore.instance.isActive) {
       handler.next(err);
       return;
     }

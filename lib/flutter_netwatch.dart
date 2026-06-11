@@ -5,7 +5,6 @@
 library flutter_netwatch;
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
@@ -63,9 +62,6 @@ class NetWatch {
 
   static TransitionBuilder get builder {
     return (BuildContext context, Widget? child) {
-      if (kReleaseMode) {
-        return child ?? const SizedBox.shrink();
-      }
       return NWBuilderWrapper(child: child);
     };
   }

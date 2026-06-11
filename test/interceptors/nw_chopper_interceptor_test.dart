@@ -136,4 +136,19 @@ void main() {
       ..sort();
     expect(captured, ['DELETE', 'GET', 'HEAD', 'PATCH', 'POST', 'PUT']);
   });
+
+  test('Passes through without capture when disabled', () async {
+    NetWatch.initialize(config: const NetWatchConfig(enabled: false));
+
+    final chopper = buildChopper(
+      MockClient((req) async => http.Response('{"ok":true}', 200)),
+    );
+
+    final response = await chopper.send<dynamic, dynamic>(
+      Request('GET', Uri.parse('/users'), chopper.baseUrl),
+    );
+
+    expect(response.statusCode, 200);
+    expect(NetWatch.transactions, isEmpty);
+  });
 }

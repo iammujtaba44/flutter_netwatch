@@ -21,6 +21,10 @@
   );
   ```
 
+### Breaking
+
+- Release builds now follow `NetWatchConfig.enabled`; set `enabled: !kReleaseMode` to keep prior release-off behavior, or `enabled: true` to opt into capture in release builds.
+
 ## 0.2.1
 
 - Migrated to `SharePlus.instance.share(ShareParams(text: ...))` — fixes the `Share.share` deprecation warnings flagged by pub.dev's static analysis.

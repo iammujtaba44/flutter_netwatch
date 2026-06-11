@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 /// Builds a custom floating bubble.
@@ -42,7 +43,7 @@ class NetWatchConfig {
   final int performanceBudgetMs;
 
   const NetWatchConfig({
-    this.enabled = true,
+    this.enabled = !kReleaseMode,
     this.maxTransactions = 200,
     this.showFloatingBubble = true,
     this.showNotifications = true,

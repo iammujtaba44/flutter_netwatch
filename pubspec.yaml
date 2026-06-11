@@ -1,7 +1,7 @@
 name: flutter_netwatch
 description: >-
   Flutter HTTP inspector — capture Dio/http/Chopper traffic, mask secrets,
-  export cURL/Postman/HAR, replay requests, view stats. Auto-off in release.
+  export cURL/Postman/HAR, replay requests, view stats. Runtime-configurable.
 version: 0.3.0
 homepage: https://www.mujtaba.cc/
 repository: https://github.com/iammujtaba44/flutter_netwatch
